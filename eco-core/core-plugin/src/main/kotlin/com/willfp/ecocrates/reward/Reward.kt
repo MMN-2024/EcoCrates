@@ -66,22 +66,44 @@ class Reward(
     ).setDisplayName(config.getString("display.name"))
         .build()
 
+    private fun formatDecimal(value: Double): String {
+        return if (value >= 0.1) {
+            // For values >= 0.1, show 2 decimal places
+            String.format("%.2f", value)
+        } else {
+            // For values < 0.01, show 3 decimal places, ensuring extra digits when needed
+            String.format("%.3f", value)
+        }
+    }
+
     fun getDisplay(player: Player, crate: Crate): ItemStack {
         val item = baseDisplay.clone()
         val fis = FastItemStack.wrap(item)
         val lore = config.getStrings("display.lore").map {
             it.replace(
                 "%chance%",
-                getPercentageChance(player, crate.rewards, displayWeight = true).toNiceString()
+                formatDecimal(
+                    getPercentageChance(
+                        player,
+                        crate.rewards,
+                        displayWeight = true
+                    )
+                ) // conditional formatting
             ).replace(
                 "%actual_chance%",
-                getPercentageChance(player, crate.rewards, displayWeight = false).toNiceString()
+                formatDecimal(
+                    getPercentageChance(
+                        player,
+                        crate.rewards,
+                        displayWeight = false
+                    )
+                ) // conditional formatting
             ).replace(
                 "%weight%",
-                this.getDisplayWeight(player).toNiceString()
+                formatDecimal(this.getDisplayWeight(player)) // conditional formatting
             ).replace(
                 "%actual_weight%",
-                this.getWeight(player).toNiceString()
+                formatDecimal(this.getWeight(player)) // conditional formatting
             ).formatEco(player)
         }
 
@@ -139,8 +161,26 @@ class Reward(
             totalWeight += if (displayWeight) other.getDisplayWeight(player) else other.getWeight(player)
         }
 
-        return (weight / totalWeight) * 100
+        // Return percentage, formatted as either 2 or 3 decimal places
+        return formatDecimal((weight / totalWeight) * 100).toDouble()
     }
+//    fun getPercentageChance(player: Player, among: Collection<Reward>, displayWeight: Boolean = false): Double {
+//        val others = among.toMutableList()
+//        others.remove(this)
+//
+//        var weight = (if (displayWeight) this.getDisplayWeight(player) else this.getWeight(player))
+//
+//        if (canPermissionMultiply) {
+//            weight *= PermissionMultipliers.getForPlayer(player).multiplier
+//        }
+//
+//        var totalWeight = weight
+//        for (other in others) {
+//            totalWeight += if (displayWeight) other.getDisplayWeight(player) else other.getWeight(player)
+//        }
+//
+//        return (weight / totalWeight) * 100
+//    }
 
     // Legacy
     val displayRow = config.getIntOrNull("display.row")
