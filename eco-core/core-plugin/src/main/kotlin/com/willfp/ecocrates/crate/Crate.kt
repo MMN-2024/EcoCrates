@@ -504,7 +504,9 @@ class Crate(
         finishSound.play(location)
         finishFireworks.forEach { it.launch(location) }
 
+        // Replace %reward% in commands before executing them
         finishCommands.map { it.replace("%player%", player.name) }
+            .map { it.replace("%reward%", event.reward.displayName) }
             .forEach { Bukkit.dispatchCommand(Bukkit.getConsoleSender(), it) }
 
         finishMessages.map { it.replace("%reward%", event.reward.displayName) }
