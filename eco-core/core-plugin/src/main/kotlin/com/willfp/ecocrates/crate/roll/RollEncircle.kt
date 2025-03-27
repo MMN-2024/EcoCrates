@@ -125,13 +125,15 @@ class RollEncircle private constructor(
                     }
                 }
 
-                val rewardItem = display.first()
-
-                if (circleCenter.distance(rewardItem.location.toVector()) > 0.2) {
-                    rewardItem.velocity = circleCenter.clone()
-                        .subtract(rewardItem.location.toVector())
-                        .normalize()
-                        .multiply(revealVelocity)
+                // Add null check to prevent NoSuchElementException
+                val rewardItem = display.firstOrNull()
+                if (rewardItem != null) {
+                    if (circleCenter.distance(rewardItem.location.toVector()) > 0.2) {
+                        rewardItem.velocity = circleCenter.clone()
+                            .subtract(rewardItem.location.toVector())
+                            .normalize()
+                            .multiply(revealVelocity)
+                    }
                 }
 
                 timeSpentRevealing++
